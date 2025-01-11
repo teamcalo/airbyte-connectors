@@ -1,8 +1,5 @@
-FROM python:3.10-slim
 
-COPY ./ ./
+FROM airbyte/python-connector-base:3.0.0
 
-RUN pip3 install --no-cache-dir -r requirements.txt
-
-
-CMD ["python3", "./main.py"]
+COPY . ./airbyte/integration_code
+RUN pip3 install --no-cache-dir -r ./airbyte/integration_code/requirements.txt
