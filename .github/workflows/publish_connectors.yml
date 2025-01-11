@@ -49,4 +49,4 @@ jobs:
           file: ./Dockerfile
           tags: |
             ${{ vars.DOCKER_USERNAME }}/${{ steps.connector.outputs.name }}:latest
-            ${{ secrets.DOCKER_USERNAME }}/${{ steps.connector.outputs.name }}:${{ github.run_number }}
+            ${{ vars.DOCKER_USERNAME }}/${{ steps.connector.outputs.name }}:${{ github.run_number }}
