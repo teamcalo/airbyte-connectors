@@ -2,8 +2,7 @@ name: Publish Connector Images
 
 on:
   push:
-    branches:
-      - master
+    branches: master
 
 permissions:
   contents: read
@@ -34,7 +33,7 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Extract connector name
@@ -49,5 +48,5 @@ jobs:
           push: true
           file: ./Dockerfile
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ steps.connector.outputs.name }}:latest
+            ${{ vars.DOCKER_USERNAME }}/${{ steps.connector.outputs.name }}:latest
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.connector.outputs.name }}:${{ github.run_number }}
