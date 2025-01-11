@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Branches",
+  "type": "object",
+  "properties": {
+    "branches": {
+      "type": "object",
+      "properties": {
+        "branchArn": {
+          "type": "string",
+          "description": "ARN for a branch.",
+          "pattern": "^arn:aws:amplify:[a-z0-9-]+:\\d{12}:apps/[a-zA-Z0-9-]+/branches/[a-zA-Z0-9-]+$"
+        },
+        "branchName": {
+          "type": "string",
+          "description": "Name for the branch.",
+          "pattern": "^[a-zA-Z0-9-]+$"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description for the branch."
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Tag for the branch."
+        },
+        "stage": {
+          "type": "string",
+          "description": "Stage for the branch.",
+          "enum": ["PRODUCTION", "BETA", "DEVELOPMENT", "EXPERIMENTAL", "PULL_REQUEST"]
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name for a branch."
+        },
+        "enableNotification": {
+          "type": "boolean",
+          "description": "Enables notifications for a branch."
+        },
+        "createTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation date and time for a branch."
+        },
+        "updateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Update date and time for a branch."
+        },
+        "environmentVariables": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables for a branch."
+        },
+        "enableAutoBuild": {
+          "type": "boolean",
+          "description": "Enables auto-building on push for a branch."
+        },
+        "customDomains": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9.-]+$"
+          },
+          "description": "Custom domains for a branch."
+        },
+        "framework": {
+          "type": "string",
+          "description": "Framework for a branch."
+        },
+        "activeJobId": {
+          "type": "string",
+          "description": "Active job ID for a branch."
+        },
+        "totalNumberOfJobs": {
+          "type": "string",
+          "description": "Total number of jobs for a branch.",
+          "pattern": "^[0-9]+$"
+        },
+        "enableBasicAuth": {
+          "type": "boolean",
+          "description": "Enables basic authorization for a branch."
+        },
+        "thumbnailUrl": {
+          "type": "string",
+          "description": "Thumbnail URL for the branch.",
+          "format": "uri"
+        },
+        "basicAuthCredentials": {
+          "type": "string",
+          "description": "Basic authorization credentials for a branch."
+        },
+        "buildSpec": {
+          "type": "string",
+          "description": "Build specification (YAML) for a branch."
+        },
+        "ttl": {
+          "type": "string",
+          "description": "The content TTL for the website in seconds.",
+          "pattern": "^[0-9]+$"
+        },
+        "associatedResources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of custom resources that are linked to this branch."
+        },
+        "enablePullRequestPreview": {
+          "type": "boolean",
+          "description": "Enables pull request previews for this branch."
+        },
+        "pullRequestEnvironmentName": {
+          "type": "string",
+          "description": "The Amplify Environment name for the pull request."
+        },
+        "destinationBranch": {
+          "type": "string",
+          "description": "The destination branch if the branch is a pull request branch."
+        },
+        "sourceBranch": {
+          "type": "string",
+          "description": "The source branch if the branch is a pull request branch."
+        },
+        "backendEnvironmentArn": {
+          "type": "string",
+          "description": "ARN of the backend environment.",
+          "pattern": "^arn:aws:amplify:[a-z0-9-]+:\\d{12}:apps/[a-zA-Z0-9-]+/backendenvironments/[a-zA-Z0-9-]+$"
+        }
+      },
+      "required": ["branchArn", "branchName", "createTime", "updateTime"]
+    },
+    "nextToken": {
+      "type": "string",
+      "description": "Pagination token."
+    }
+  },
+  "required": ["branches"]
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "object",
+      "properties": {
+        "commitId": {
+          "type": "string",
+          "maxLength": 255,
+          "pattern": "(?s).*"
+        },
+        "commitMessage": {
+          "type": "string",
+          "maxLength": 10000,
+          "pattern": "(?s).*"
+        },
+        "commitTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "jobArn": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "jobId": {
+          "type": "string",
+          "maxLength": 255,
+          "pattern": "[0-9]+"
+        },
+        "jobType": {
+          "type": "string",
+          "maxLength": 10,
+          "enum": ["RELEASE", "RETRY", "MANUAL", "WEB_HOOK"]
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "PROVISIONING", "RUNNING", "FAILED", "SUCCEED", "CANCELLING", "CANCELLED"]
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sourceUrl": {
+          "type": "string",
+          "maxLength": 3000,
+          "pattern": "^(s3|https|http)://.*"
+        },
+        "sourceUrlType": {
+          "type": "string",
+          "enum": ["ZIP", "BUCKET_PREFIX"]
+        }
+      },
+      "required": ["commitId", "commitMessage", "commitTime", "jobArn", "jobId", "jobType", "startTime", "status"]
+    }
+  },
+  "required": ["summary"]
+}

@@ -1,0 +1,138 @@
+version: "0.29.0"
+
+definitions:
+  selector:
+    type: RecordSelector
+    extractor:
+      type: DpathExtractor
+      field_path: ["{{ parameters['data_extraction_path'] }}"]
+
+  requester:
+    type: HttpRequester
+    url_base: https://amplify.{{ config['region'] }}.amazonaws.com
+    http_method: GET
+    authenticator:
+      type: CustomAuthenticator
+      class_name: source_aws_amplify.components.IAMAuthenticator
+    request_parameters:
+      maxResults: "{{ parameters['max_results'] }}"
+
+  paginator:
+    type: DefaultPaginator
+    pagination_strategy:
+      type: CursorPagination
+      cursor_value: "{{ response['nextToken'] }}"
+    page_token_option:
+      type: RequestOption
+      inject_into: request_parameter
+      field_name: nextToken
+
+  retriever:
+    type: SimpleRetriever
+    record_selector:
+      $ref: "#/definitions/selector"
+    paginator:
+      $ref: "#/definitions/paginator"
+    requester:
+      $ref: "#/definitions/requester"
+
+  schema_loader:
+    type: JsonFileSchemaLoader
+
+  ## STREAMS
+  base_stream:
+    type: DeclarativeStream
+    retriever:
+      $ref: "#/definitions/retriever"
+    schema_loader:
+      $ref: "#/definitions/schema_loader"
+
+  apps_stream:
+    $ref: "#/definitions/base_stream"
+    $parameters:
+      name: "apps"
+      primary_key: "appId"
+      path: "/apps"
+      file_path: "source_aws_amplify/schemas/apps.json"
+      max_results: 100
+      data_extraction_path: "apps"
+
+  branches_stream_router:
+    type: SubstreamPartitionRouter
+    parent_stream_configs:
+      - stream: "#/definitions/apps_stream"
+        parent_key: "appId"
+        partition_field: "app_id"
+        incremental_dependency: true
+
+  branches_stream:
+    $ref: "#/definitions/base_stream"
+    retriever:
+      $ref: "#/definitions/retriever"
+      requester:
+        $ref: "#/definitions/requester"
+        path: "/apps/{{ stream_partition.app_id }}/branches"
+      partition_router:
+        $ref: "#/definitions/branches_stream_router"
+    $parameters:
+      name: "branches"
+      primary_key: "branchName"
+      file_path: "source_aws_amplify/schemas/branches.json"
+      max_results: 50
+      data_extraction_path: "branches"
+
+  jobs_stream_router:
+    type: SubstreamPartitionRouter
+    parent_stream_configs:
+      - stream: "#/definitions/branches_stream"
+        parent_key: "branchName"
+        partition_field: "branch_name"
+        incremental_dependency: true
+
+  jobs_stream:
+    $ref: "#/definitions/base_stream"
+    retriever:
+      $ref: "#/definitions/retriever"
+      requester:
+        $ref: "#/definitions/requester"
+        path: "/apps/{{ stream_slice.parent_slice.app_id }}/branches/{{ stream_slice.branch_name.replace('/', '%2F') }}/jobs"
+      partition_router:
+        $ref: "#/definitions/jobs_stream_router"
+    $parameters:
+      name: "jobs"
+      primary_key: "branchName"
+      file_path: "source_aws_amplify/schemas/jobs.json"
+      max_results: 50
+      data_extraction_path: "jobSummaries"
+
+streams:
+  - "#/definitions/apps_stream"
+  - "#/definitions/branches_stream"
+  - "#/definitions/jobs_stream"
+
+check:
+  stream_names:
+    - "apps"
+
+spec:
+  type: Spec
+  documentation_url: https://docs.airbyte.com/integrations/sources/amplify
+  connection_specification:
+    title: Amplify Spec
+    type: object
+    required:
+      - region
+    additionalProperties: true
+    properties:
+      region:
+        type: string
+        description: AWS region
+      assume_role:
+        type: string
+        description: Role ARN to assume
+      access_key_id:
+        type: string
+        description: AWS Access Key ID
+      secret_access_key:
+        type: string
+        description: AWS Secret Access Key
