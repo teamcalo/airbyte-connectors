@@ -12,8 +12,20 @@ definitions:
     url_base: https://amplify.{{ config['region'] }}.amazonaws.com
     http_method: GET
     authenticator:
-      type: CustomAuthenticator
-      class_name: source_aws_amplify.components.IAMAuthenticator
+      type: SelectiveAuthenticator
+      authenticators:
+        auth_type_credentials:
+          type: CustomAuthenticator
+          class_name: source_aws_amplify.components.IAMCredentialsAuthenticator
+          access_key_id: "{{ config['auth_type']['access_key_id'] }}"
+          secret_access_key: "{{ config['auth_type']['secret_access_key'] }}"
+        auth_type_role:
+          type: CustomAuthenticator
+          class_name: source_aws_amplify.components.IAMRoleAuthenticator
+          assume_role: "{{ config['auth_type']['assume_role'] }}"
+      authenticator_selection_path:
+        - auth_type
+        - type
     request_parameters:
       maxResults: "{{ parameters['max_results'] }}"
 
@@ -122,17 +134,38 @@ spec:
     type: object
     required:
       - region
+      - auth_type
     additionalProperties: true
     properties:
       region:
         type: string
         description: AWS region
-      assume_role:
-        type: string
-        description: Role ARN to assume
-      access_key_id:
-        type: string
-        description: AWS Access Key ID
-      secret_access_key:
-        type: string
-        description: AWS Secret Access Key
+      auth_type:
+        type: object
+        oneOf:
+          - type: object
+            title: IAM Credentials
+            properties:
+              type:
+                type: string
+                const: auth_type_credentials
+              access_key_id:
+                type: string
+                description: AWS Access Key ID
+                airbyte_secret: true
+              secret_access_key:
+                type: string
+                description: AWS Secret Access Key
+                airbyte_secret: true
+          - type: object
+            title: IAM Role
+            required:
+              - assume_role
+            properties:
+              type:
+                type: string
+                const: auth_type_role
+              assume_role:
+                type: string
+                description: Role ARN to assume
+        title: Authorization Method
