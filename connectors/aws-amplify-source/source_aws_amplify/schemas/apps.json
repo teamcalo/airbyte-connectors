@@ -2,169 +2,158 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "apps": {
+    "appArn": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "appId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20,
+      "pattern": "d[a-z0-9]+"
+    },
+    "createTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "defaultDomain": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "pattern": "(?s).*"
+    },
+    "enableBasicAuth": {
+      "type": "boolean"
+    },
+    "enableBranchAutoBuild": {
+      "type": "boolean"
+    },
+    "environmentVariables": {
       "type": "object",
-      "properties": {
-        "appArn": {
-          "type": "string",
-          "maxLength": 1000
-        },
-        "appId": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 20,
-          "pattern": "d[a-z0-9]+"
-        },
-        "createTime": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "defaultDomain": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 1000
-        },
-        "description": {
-          "type": "string",
-          "maxLength": 1000,
-          "pattern": "(?s).*"
-        },
-        "enableBasicAuth": {
-          "type": "boolean"
-        },
-        "enableBranchAutoBuild": {
-          "type": "boolean"
-        },
-        "environmentVariables": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string",
-            "maxLength": 5500,
-            "pattern": "(?s).*"
-          },
-          "propertyNames": {
-            "maxLength": 255,
-            "pattern": "(?s).*"
-          }
-        },
-        "name": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 255,
-          "pattern": "(?s).+"
-        },
-        "platform": {
-          "type": "string",
-          "enum": [
-            "WEB",
-            "WEB_DYNAMIC",
-            "WEB_COMPUTE"
-          ]
-        },
-        "repository": {
-          "type": "string",
-          "maxLength": 1000,
-          "pattern": "(?s).*"
-        },
-        "updateTime": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "autoBranchCreationConfig": {
-          "type": "object"
-        },
-        "autoBranchCreationPatterns": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 2048,
-            "pattern": "(?s).+"
-          }
-        },
-        "basicAuthCredentials": {
-          "type": "string",
-          "maxLength": 2000,
-          "pattern": "(?s).*"
-        },
-        "buildSpec": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 25000,
-          "pattern": "(?s).+"
-        },
-        "cacheConfig": {
-          "type": "object"
-        },
-        "customHeaders": {
-          "type": "string",
-          "minLength": 0,
-          "maxLength": 25000,
-          "pattern": "(?s).*"
-        },
-        "customRules": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "enableAutoBranchCreation": {
-          "type": "boolean"
-        },
-        "enableBranchAutoDeletion": {
-          "type": "boolean"
-        },
-        "iamServiceRoleArn": {
-          "type": "string",
-          "minLength": 0,
-          "maxLength": 1000,
-          "pattern": "(?s).*"
-        },
-        "productionBranch": {
-          "type": "object"
-        },
-        "repositoryCloneMethod": {
-          "type": "string",
-          "enum": [
-            "SSH",
-            "TOKEN",
-            "SIGV4"
-          ]
-        },
-        "tags": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string",
-            "maxLength": 256,
-            "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
-          },
-          "propertyNames": {
-            "minLength": 1,
-            "maxLength": 128,
-            "pattern": "^(?!aws:)[a-zA-Z+-=._:/]+$"
-          }
-        }
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 5500,
+        "pattern": "(?s).*"
       },
-      "required": [
-        "appArn",
-        "appId",
-        "createTime",
-        "defaultDomain",
-        "description",
-        "enableBasicAuth",
-        "enableBranchAutoBuild",
-        "environmentVariables",
-        "name",
-        "platform",
-        "repository",
-        "updateTime"
+      "propertyNames": {
+        "maxLength": 255,
+        "pattern": "(?s).*"
+      }
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "(?s).+"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "WEB",
+        "WEB_DYNAMIC",
+        "WEB_COMPUTE"
       ]
     },
-    "nextToken": {
-      "type": "string"
+    "repository": {
+      "type": "string",
+      "maxLength": 1000,
+      "pattern": "(?s).*"
+    },
+    "updateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "autoBranchCreationConfig": {
+      "type": "object"
+    },
+    "autoBranchCreationPatterns": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2048,
+        "pattern": "(?s).+"
+      }
+    },
+    "basicAuthCredentials": {
+      "type": "string",
+      "maxLength": 2000,
+      "pattern": "(?s).*"
+    },
+    "buildSpec": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 25000,
+      "pattern": "(?s).+"
+    },
+    "cacheConfig": {
+      "type": "object"
+    },
+    "customHeaders": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 25000,
+      "pattern": "(?s).*"
+    },
+    "customRules": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "enableAutoBranchCreation": {
+      "type": "boolean"
+    },
+    "enableBranchAutoDeletion": {
+      "type": "boolean"
+    },
+    "iamServiceRoleArn": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 1000,
+      "pattern": "(?s).*"
+    },
+    "productionBranch": {
+      "type": "object"
+    },
+    "repositoryCloneMethod": {
+      "type": "string",
+      "enum": [
+        "SSH",
+        "TOKEN",
+        "SIGV4"
+      ]
+    },
+    "tags": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 256,
+        "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"
+      },
+      "propertyNames": {
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^(?!aws:)[a-zA-Z+-=._:/]+$"
+      }
     }
   },
   "required": [
-    "apps"
+    "appArn",
+    "appId",
+    "createTime",
+    "defaultDomain",
+    "description",
+    "enableBasicAuth",
+    "enableBranchAutoBuild",
+    "environmentVariables",
+    "name",
+    "platform",
+    "repository",
+    "updateTime"
   ]
 }
