@@ -61,6 +61,9 @@ definitions:
 
   apps_stream:
     $ref: "#/definitions/base_stream"
+    transformations:
+      - type: CustomTransformation
+        class_name: source_aws_amplify.components.DateTimeTransformation
     $parameters:
       name: "apps"
       primary_key: "appId"
@@ -79,6 +82,9 @@ definitions:
 
   branches_stream:
     $ref: "#/definitions/base_stream"
+    transformations:
+      - type: CustomTransformation
+        class_name: source_aws_amplify.components.DateTimeTransformation
     retriever:
       $ref: "#/definitions/retriever"
       requester:

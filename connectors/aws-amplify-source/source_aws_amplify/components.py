@@ -80,7 +80,13 @@ class IAMRoleAuthenticator(BaseIAMAuthenticator):
 
 
 class DateTimeTransformation(RecordTransformation):
-    DATETIME_FIELDS = ["commitTime", "startTime", "endTime"]
+    DATETIME_FIELDS = [
+        "commitTime",
+        "startTime",
+        "endTime",
+        "createTime",
+        "updateTime",
+    ]
 
     def transform(
         self,
