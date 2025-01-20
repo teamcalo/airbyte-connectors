@@ -5,10 +5,12 @@ import boto3
 import requests
 from airbyte_cdk.sources.declarative.auth.declarative_authenticator import DeclarativeAuthenticator
 from airbyte_cdk.sources.declarative.interpolation import InterpolatedString
-from airbyte_cdk.sources.declarative.types import Config
+from airbyte_cdk.sources.declarative.transformations import RecordTransformation
+from airbyte_cdk.sources.declarative.types import Config, Record, StreamSlice, StreamState
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
-from typing import Union, Mapping, Any
+from typing import Union, Mapping, Any, Optional
+from datetime import datetime
 
 
 @dataclass
@@ -75,3 +77,26 @@ class IAMRoleAuthenticator(BaseIAMAuthenticator):
     def __post_init__(self, parameters: Mapping[str, Any]):
         if isinstance(self.assume_role, str):
             self.assume_role = InterpolatedString(self.assume_role, parameters=parameters)
+
+
+class DateTimeTransformation(RecordTransformation):
+    DATETIME_FIELDS = ["commitTime", "startTime", "endTime"]
+
+    def transform(
+        self,
+        record: Record,
+        config: Optional[Config] = None,
+        stream_state: Optional[StreamState] = None,
+        stream_slice: Optional[StreamSlice] = None,
+    ) -> Record:
+        for field in self.DATETIME_FIELDS:
+            if field in record and record[field] is not None:
+                # Convert scientific notation to float
+                timestamp = float(record[field])
+                # Convert to seconds if in milliseconds
+                if timestamp > 1e11:
+                    timestamp = timestamp / 1000
+                # Convert to datetime string
+                dt = datetime.fromtimestamp(timestamp)
+                record[field] = dt.isoformat()
+        return record

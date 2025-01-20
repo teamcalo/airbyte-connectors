@@ -103,6 +103,8 @@ definitions:
 
   jobs_stream:
     $ref: "#/definitions/base_stream"
+    transformations:
+      - source_aws_amplify.components.DateTimeTransformation
     retriever:
       $ref: "#/definitions/retriever"
       requester:
