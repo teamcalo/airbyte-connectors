@@ -17,15 +17,27 @@ definitions:
       password: "{{ config['api_token'] }}"
     request_parameters:
       pagelen: "{{ parameters['page_size'] or 50 }}"
+    error_handler:
+      type: DefaultErrorHandler
+      max_retries: 3
+      backoff_strategies:
+        - type: ExponentialBackoffStrategy
+          factor: 2
+      response_filters:
+        - type: HttpResponseFilter
+          action: RETRY
+          http_codes: [429, 500, 502, 503, 504]
 
   paginator:
     type: DefaultPaginator
     pagination_strategy:
-      type: CursorPagination
-      cursor_value: "{{ response['next'] }}"
-      stop_condition: "{{ not response['next'] }}"
+      type: PageIncrement
+      page_size: "{{ parameters['page_size'] or 50 }}"
+      start_from_page: 1
     page_token_option:
-      type: RequestPath
+      type: RequestOption
+      inject_into: request_parameter
+      field_name: page
 
   retriever:
     type: SimpleRetriever
@@ -107,7 +119,6 @@ definitions:
         path: "/repositories/{{ stream_partition.repository }}/pullrequests"
         request_parameters:
           pagelen: "{{ parameters['page_size'] or 50 }}"
-          state: "{{ config.get('pull_request_state', 'ALL') }}"
           sort: "updated_on"
       partition_router:
         $ref: "#/definitions/pull_requests_stream_router"
@@ -190,7 +201,7 @@ definitions:
         path: "/repositories/{{ stream_partition.repository }}/deployments"
         request_parameters:
           pagelen: "{{ parameters['page_size'] or 50 }}"
-          sort: "-last_update_time"
+          # Removed sort parameter as Bitbucket deployments API doesn't support last_update_time sorting
       partition_router:
         $ref: "#/definitions/deployments_stream_router"
     $parameters:
@@ -255,9 +266,3 @@ spec:
         title: Start Date
         default: "2020-01-01T00:00:00Z"
         examples: ["2021-01-01T00:00:00Z"]
-      pull_request_state:
-        type: string
-        enum: ["OPEN", "MERGED", "DECLINED", "SUPERSEDED", "ALL"]
-        default: "ALL"
-        description: Filter pull requests by state
-        title: Pull Request State
