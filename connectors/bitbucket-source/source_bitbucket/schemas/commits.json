@@ -1,0 +1,150 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "hash": {
+      "type": "string",
+      "description": "Commit hash"
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Commit date"
+    },
+    "message": {
+      "type": "string",
+      "description": "Commit message"
+    },
+    "author": {
+      "type": "object",
+      "properties": {
+        "raw": {
+          "type": "string",
+          "description": "Raw author string"
+        },
+        "user": {
+          "type": ["object", "null"],
+          "properties": {
+            "uuid": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            },
+            "display_name": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "parents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hash": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "repository": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "full_name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "raw": {
+          "type": "string"
+        },
+        "markup": {
+          "type": "string"
+        },
+        "html": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "self": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "html": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "diff": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "approve": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "comments": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "statuses": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "type": {
+      "type": "string",
+      "description": "Object type (commit)"
+    }
+  }
+}

@@ -1,0 +1,264 @@
+version: "0.29.0"
+
+definitions:
+  selector:
+    type: RecordSelector
+    extractor:
+      type: DpathExtractor
+      field_path: ["{{ parameters['data_extraction_path'] }}"]
+
+  requester:
+    type: HttpRequester
+    url_base: https://api.bitbucket.org/2.0
+    http_method: GET
+    authenticator:
+      type: BasicHttpAuthenticator
+      username: "{{ config['email'] }}"
+      password: "{{ config['api_token'] }}"
+    request_parameters:
+      pagelen: "{{ parameters['page_size'] or 50 }}"
+
+  paginator:
+    type: DefaultPaginator
+    pagination_strategy:
+      type: CursorPagination
+      cursor_value: "{{ response['next'] }}"
+      stop_condition: "{{ not response['next'] }}"
+    page_token_option:
+      type: RequestPath
+
+  retriever:
+    type: SimpleRetriever
+    record_selector:
+      $ref: "#/definitions/selector"
+    paginator:
+      $ref: "#/definitions/paginator"
+    requester:
+      $ref: "#/definitions/requester"
+
+  schema_loader:
+    type: JsonFileSchemaLoader
+
+  ## STREAMS
+  base_stream:
+    type: DeclarativeStream
+    retriever:
+      $ref: "#/definitions/retriever"
+    schema_loader:
+      $ref: "#/definitions/schema_loader"
+
+  # Repositories stream - lists all repositories in a workspace
+  repositories_stream:
+    $ref: "#/definitions/base_stream"
+    incremental_sync:
+      type: DatetimeBasedCursor
+      cursor_field: "updated_on"
+      datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
+      start_datetime:
+        type: MinMaxDatetime
+        datetime: "{{ config['start_date'] or '2020-01-01T00:00:00Z' }}"
+        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      end_datetime:
+        type: MinMaxDatetime
+        datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
+        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+    retriever:
+      $ref: "#/definitions/retriever"
+      requester:
+        $ref: "#/definitions/requester"
+        path: "/repositories/{{ config['workspace'] }}"
+        request_parameters:
+          pagelen: "{{ parameters['page_size'] or 50 }}"
+          sort: "updated_on"
+          q: "updated_on >= {{ stream_state.get('updated_on', config.get('start_date', '2020-01-01T00:00:00Z')) }}"
+    $parameters:
+      name: "repositories"
+      primary_key: "uuid"
+      file_path: "source_bitbucket/schemas/repositories.json"
+      page_size: 50
+      data_extraction_path: "values"
+
+  # Pull requests stream - requires repository context
+  pull_requests_stream_router:
+    type: SubstreamPartitionRouter
+    parent_stream_configs:
+      - stream: "#/definitions/repositories_stream"
+        parent_key: "full_name"
+        partition_field: "repository"
+        incremental_dependency: true
+
+  pull_requests_stream:
+    $ref: "#/definitions/base_stream"
+    incremental_sync:
+      type: DatetimeBasedCursor
+      cursor_field: "updated_on"
+      datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
+      start_datetime:
+        type: MinMaxDatetime
+        datetime: "{{ config['start_date'] or '2020-01-01T00:00:00Z' }}"
+        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      end_datetime:
+        type: MinMaxDatetime
+        datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
+        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+    retriever:
+      $ref: "#/definitions/retriever"
+      requester:
+        $ref: "#/definitions/requester"
+        path: "/repositories/{{ stream_partition.repository }}/pullrequests"
+        request_parameters:
+          pagelen: "{{ parameters['page_size'] or 50 }}"
+          state: "{{ config.get('pull_request_state', 'ALL') }}"
+          sort: "updated_on"
+          q: "updated_on >= {{ stream_state.get('updated_on', config.get('start_date', '2020-01-01T00:00:00Z')) }}"
+      partition_router:
+        $ref: "#/definitions/pull_requests_stream_router"
+    $parameters:
+      name: "pull_requests"
+      primary_key: "id"
+      file_path: "source_bitbucket/schemas/pull_requests.json"
+      page_size: 50
+      data_extraction_path: "values"
+
+  # Commits stream - requires repository context
+  commits_stream_router:
+    type: SubstreamPartitionRouter
+    parent_stream_configs:
+      - stream: "#/definitions/repositories_stream"
+        parent_key: "full_name"
+        partition_field: "repository"
+        incremental_dependency: true
+
+  commits_stream:
+    $ref: "#/definitions/base_stream"
+    incremental_sync:
+      type: DatetimeBasedCursor
+      cursor_field: "date"
+      datetime_format: "%Y-%m-%dT%H:%M:%S%z"
+      start_datetime:
+        type: MinMaxDatetime
+        datetime: "{{ config['start_date'] or '2020-01-01T00:00:00Z' }}"
+        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      end_datetime:
+        type: MinMaxDatetime
+        datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
+        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+    retriever:
+      $ref: "#/definitions/retriever"
+      requester:
+        $ref: "#/definitions/requester"
+        path: "/repositories/{{ stream_partition.repository }}/commits"
+        request_parameters:
+          pagelen: "{{ parameters['page_size'] or 50 }}"
+          sort: "-date"
+          since: "{{ stream_state.get('date', config.get('start_date', '2020-01-01T00:00:00Z')) }}"
+      partition_router:
+        $ref: "#/definitions/commits_stream_router"
+    $parameters:
+      name: "commits"
+      primary_key: "hash"
+      file_path: "source_bitbucket/schemas/commits.json"
+      page_size: 50
+      data_extraction_path: "values"
+
+  # Deployments stream - requires repository context
+  deployments_stream_router:
+    type: SubstreamPartitionRouter
+    parent_stream_configs:
+      - stream: "#/definitions/repositories_stream"
+        parent_key: "full_name"
+        partition_field: "repository"
+        incremental_dependency: true
+
+  deployments_stream:
+    $ref: "#/definitions/base_stream"
+    incremental_sync:
+      type: DatetimeBasedCursor
+      cursor_field: "last_update_time"
+      datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
+      start_datetime:
+        type: MinMaxDatetime
+        datetime: "{{ config['start_date'] or '2020-01-01T00:00:00Z' }}"
+        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      end_datetime:
+        type: MinMaxDatetime
+        datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
+        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+    retriever:
+      $ref: "#/definitions/retriever"
+      requester:
+        $ref: "#/definitions/requester"
+        path: "/repositories/{{ stream_partition.repository }}/deployments"
+        request_parameters:
+          pagelen: "{{ parameters['page_size'] or 50 }}"
+          sort: "-last_update_time"
+      partition_router:
+        $ref: "#/definitions/deployments_stream_router"
+    $parameters:
+      name: "deployments"
+      primary_key: "uuid"
+      file_path: "source_bitbucket/schemas/deployments.json"
+      page_size: 50
+      data_extraction_path: "values"
+
+  # Workspace users stream
+  workspace_users_stream:
+    $ref: "#/definitions/base_stream"
+    $parameters:
+      name: "workspace_users"
+      primary_key: "uuid"
+      path: "/workspaces/{{ config['workspace'] }}/members"
+      file_path: "source_bitbucket/schemas/workspace_users.json"
+      page_size: 50
+      data_extraction_path: "values"
+
+streams:
+  - "#/definitions/repositories_stream"
+  - "#/definitions/pull_requests_stream"
+  - "#/definitions/commits_stream"
+  - "#/definitions/deployments_stream"
+  - "#/definitions/workspace_users_stream"
+
+check:
+  stream_names:
+    - "repositories"
+
+spec:
+  type: Spec
+  documentation_url: https://docs.airbyte.com/integrations/sources/bitbucket
+  connection_specification:
+    title: Bitbucket Spec
+    type: object
+    required:
+      - workspace
+      - email
+      - api_token
+    additionalProperties: true
+    properties:
+      workspace:
+        type: string
+        description: Bitbucket workspace name (e.g., your-workspace)
+        title: Workspace
+      email:
+        type: string
+        description: Your Atlassian account email (used for Bitbucket login)
+        title: Email
+        airbyte_secret: true
+      api_token:
+        type: string
+        description: Bitbucket API token (create at bitbucket.org/account/settings/api-tokens)
+        title: API Token
+        airbyte_secret: true
+      start_date:
+        type: string
+        format: date-time
+        description: Start date for incremental syncs (ISO 8601 format, e.g., 2021-01-01T00:00:00Z)
+        title: Start Date
+        default: "2020-01-01T00:00:00Z"
+        examples: ["2021-01-01T00:00:00Z"]
+      pull_request_state:
+        type: string
+        enum: ["OPEN", "MERGED", "DECLINED", "SUPERSEDED", "ALL"]
+        default: "ALL"
+        description: Filter pull requests by state
+        title: Pull Request State

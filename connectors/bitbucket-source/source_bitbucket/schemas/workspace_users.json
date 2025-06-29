@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "uuid": {
+      "type": "string",
+      "description": "User UUID"
+    },
+    "username": {
+      "type": "string",
+      "description": "Username"
+    },
+    "nickname": {
+      "type": "string",
+      "description": "User nickname"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Display name"
+    },
+    "account_status": {
+      "type": "string",
+      "description": "Account status"
+    },
+    "website": {
+      "type": ["string", "null"],
+      "description": "User website"
+    },
+    "location": {
+      "type": ["string", "null"],
+      "description": "User location"
+    },
+    "created_on": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Account creation timestamp"
+    },
+    "has_2fa_enabled": {
+      "type": "boolean",
+      "description": "Whether 2FA is enabled"
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "self": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "html": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "avatar": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "repositories": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "following": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "followers": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "type": {
+      "type": "string",
+      "description": "Object type (user)"
+    }
+  }
+}

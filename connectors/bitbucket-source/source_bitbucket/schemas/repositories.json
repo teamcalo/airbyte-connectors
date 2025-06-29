@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "uuid": {
+      "type": "string",
+      "description": "Repository UUID"
+    },
+    "name": {
+      "type": "string",
+      "description": "Repository name"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Full repository name (workspace/repo_name)"
+    },
+    "description": {
+      "type": ["string", "null"],
+      "description": "Repository description"
+    },
+    "language": {
+      "type": ["string", "null"],
+      "description": "Primary programming language"
+    },
+    "scm": {
+      "type": "string",
+      "description": "Source control management type (git, hg)"
+    },
+    "is_private": {
+      "type": "boolean",
+      "description": "Whether the repository is private"
+    },
+    "has_issues": {
+      "type": "boolean",
+      "description": "Whether issues are enabled"
+    },
+    "has_wiki": {
+      "type": "boolean",
+      "description": "Whether wiki is enabled"
+    },
+    "size": {
+      "type": "integer",
+      "description": "Repository size in bytes"
+    },
+    "fork_policy": {
+      "type": "string",
+      "description": "Fork policy"
+    },
+    "created_on": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp"
+    },
+    "updated_on": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp"
+    },
+    "owner": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "project": {
+      "type": ["object", "null"],
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "mainbranch": {
+      "type": ["object", "null"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "website": {
+      "type": ["string", "null"],
+      "description": "Repository website URL"
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "self": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "html": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        },
+        "clone": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "href": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "type": {
+      "type": "string",
+      "description": "Object type (repository)"
+    }
+  }
+}

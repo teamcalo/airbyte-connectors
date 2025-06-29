@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "uuid": {
+      "type": "string",
+      "description": "Deployment UUID"
+    },
+    "key": {
+      "type": "string",
+      "description": "Deployment key"
+    },
+    "version": {
+      "type": "integer",
+      "description": "Deployment version number"
+    },
+    "name": {
+      "type": "string",
+      "description": "Deployment name"
+    },
+    "url": {
+      "type": ["string", "null"],
+      "description": "Deployment URL"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["IN_PROGRESS", "SUCCESSFUL", "FAILED", "STOPPED", "UNDEPLOYED"],
+      "description": "Deployment state"
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "release": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": ["string", "null"]
+        },
+        "commit": {
+          "type": "object",
+          "properties": {
+            "hash": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "deployable": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": ["string", "null"]
+        },
+        "commit": {
+          "type": "object",
+          "properties": {
+            "hash": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "last_update_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp"
+    },
+    "step": {
+      "type": ["object", "null"],
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "trigger_type": {
+          "type": "string"
+        },
+        "state": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "self": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "type": {
+      "type": "string",
+      "description": "Object type (deployment)"
+    }
+  }
+}
