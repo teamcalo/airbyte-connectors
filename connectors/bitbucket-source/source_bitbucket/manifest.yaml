@@ -70,7 +70,6 @@ definitions:
         request_parameters:
           pagelen: "{{ parameters['page_size'] or 50 }}"
           sort: "updated_on"
-          q: "updated_on >= {{ stream_state.get('updated_on', config.get('start_date', '2020-01-01T00:00:00Z')) }}"
     $parameters:
       name: "repositories"
       primary_key: "uuid"
@@ -110,7 +109,6 @@ definitions:
           pagelen: "{{ parameters['page_size'] or 50 }}"
           state: "{{ config.get('pull_request_state', 'ALL') }}"
           sort: "updated_on"
-          q: "updated_on >= {{ stream_state.get('updated_on', config.get('start_date', '2020-01-01T00:00:00Z')) }}"
       partition_router:
         $ref: "#/definitions/pull_requests_stream_router"
     $parameters:
@@ -151,7 +149,6 @@ definitions:
         request_parameters:
           pagelen: "{{ parameters['page_size'] or 50 }}"
           sort: "-date"
-          since: "{{ stream_state.get('date', config.get('start_date', '2020-01-01T00:00:00Z')) }}"
       partition_router:
         $ref: "#/definitions/commits_stream_router"
     $parameters:
@@ -184,6 +181,8 @@ definitions:
         type: MinMaxDatetime
         datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
         datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      # Note: Bitbucket deployments API may not support time-based filtering
+      # This configuration enables incremental sync on the client side
     retriever:
       $ref: "#/definitions/retriever"
       requester:
