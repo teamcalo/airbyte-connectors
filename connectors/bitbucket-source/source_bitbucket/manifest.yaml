@@ -15,8 +15,6 @@ definitions:
       type: BasicHttpAuthenticator
       username: "{{ config['email'] }}"
       password: "{{ config['api_token'] }}"
-    request_parameters:
-      pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
     error_handler:
       type: DefaultErrorHandler
       max_retries: 3
@@ -32,10 +30,8 @@ definitions:
     type: DefaultPaginator
     pagination_strategy:
       type: CursorPagination
-      cursor_value: "{{ response.get('next', '') }}"
-      stop_condition: "{{ not response.get('next') }}"
-    page_token_option:
-      type: RequestPath
+      cursor_value: "{{ response['next'] or '' }}"
+      stop_condition: "{{ not response['next'] }}"
 
   retriever:
     type: SimpleRetriever
@@ -157,7 +153,6 @@ definitions:
         path: "/repositories/{{ stream_partition.repository }}/commits"
         request_parameters:
           pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
-          sort: "-date"
       partition_router:
         $ref: "#/definitions/commits_stream_router"
     $parameters:
