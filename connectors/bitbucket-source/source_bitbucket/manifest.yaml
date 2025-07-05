@@ -7,6 +7,36 @@ definitions:
       type: DpathExtractor
       field_path: ["{{ parameters['data_extraction_path'] }}"]
 
+  # API Budget configuration for Bitbucket rate limiting
+  api_budget:
+    type: HTTPAPIBudget
+    # Note: Bitbucket only provides X-RateLimit-Limit, X-RateLimit-Resource, and X-RateLimit-NearLimit
+    # No X-RateLimit-Reset or X-RateLimit-Remaining headers are available
+    status_codes_for_ratelimit_hit: [429]
+    policies:
+      # Primary policy for repository data access (covers most of our streams)
+      # Based on Bitbucket's 1,000-10,000 requests per hour for /2.0/repositories/* endpoints
+      # Uses rolling/sliding window as per Bitbucket documentation
+      - type: MovingWindowCallRatePolicy
+        rates:
+          - limit: 1000  # Conservative limit, can scale up to 10,000 based on workspace plan
+            interval: "PT1H"  # 1 hour rolling window
+        matchers:
+          - method: "GET"
+            url_base: "https://api.bitbucket.org/2.0"
+            url_path_pattern: "^/repositories/.*"
+      
+      # Policy for workspace-level endpoints (workspace users)
+      # Using the same 1,000 requests per hour rolling window limit
+      - type: MovingWindowCallRatePolicy
+        rates:
+          - limit: 1000
+            interval: "PT1H"  # 1 hour rolling window
+        matchers:
+          - method: "GET"
+            url_base: "https://api.bitbucket.org/2.0"
+            url_path_pattern: "^/workspaces/.*"
+
   requester:
     type: HttpRequester
     url_base: "{{ config['api_url'] or 'https://api.bitbucket.org/2.0' }}"
@@ -20,7 +50,7 @@ definitions:
       max_retries: 3
       backoff_strategies:
         - type: ExponentialBackoffStrategy
-          factor: 2
+          factor: 4
       response_filters:
         - type: HttpResponseFilter
           action: RETRY
@@ -41,6 +71,8 @@ definitions:
       $ref: "#/definitions/paginator"
     requester:
       $ref: "#/definitions/requester"
+    api_budget:
+      $ref: "#/definitions/api_budget"
 
   schema_loader:
     type: JsonFileSchemaLoader
@@ -74,13 +106,13 @@ definitions:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ config['workspace'] }}"
         request_parameters:
-          pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
+          pagelen: "{{ parameters['page_size'] }}"
           sort: "updated_on"
     $parameters:
       name: "repositories"
       primary_key: "uuid"
       file_path: "source_bitbucket/schemas/repositories.json"
-      page_size: 50
+      page_size: 100
       data_extraction_path: "values"
 
   # Pull requests stream - requires repository context
@@ -112,7 +144,7 @@ definitions:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/pullrequests"
         request_parameters:
-          pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
+          pagelen: "{{ parameters['page_size'] }}"
           sort: "updated_on"
       partition_router:
         $ref: "#/definitions/pull_requests_stream_router"
@@ -120,7 +152,7 @@ definitions:
       name: "pull_requests"
       primary_key: "id"
       file_path: "source_bitbucket/schemas/pull_requests.json"
-      page_size: 50
+      page_size: 100
       data_extraction_path: "values"
 
   # Commits stream - requires repository context
@@ -152,14 +184,14 @@ definitions:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/commits"
         request_parameters:
-          pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
+          pagelen: "{{ parameters['page_size'] }}"
       partition_router:
         $ref: "#/definitions/commits_stream_router"
     $parameters:
       name: "commits"
       primary_key: "hash"
       file_path: "source_bitbucket/schemas/commits.json"
-      page_size: 50
+      page_size: 100
       data_extraction_path: "values"
 
   # Deployments stream - requires repository context
@@ -193,7 +225,7 @@ definitions:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/deployments"
         request_parameters:
-          pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
+          pagelen: "{{ parameters['page_size'] }}"
           # Removed sort parameter as Bitbucket deployments API doesn't support last_update_time sorting
       partition_router:
         $ref: "#/definitions/deployments_stream_router"
@@ -201,7 +233,7 @@ definitions:
       name: "deployments"
       primary_key: "uuid"
       file_path: "source_bitbucket/schemas/deployments.json"
-      page_size: 50
+      page_size: 100
       data_extraction_path: "values"
 
   # Workspace users stream
@@ -213,12 +245,12 @@ definitions:
         $ref: "#/definitions/requester"
         path: "/workspaces/{{ config['workspace'] }}/members"
         request_parameters:
-          pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
+          pagelen: "{{ parameters['page_size'] }}"
     $parameters:
       name: "workspace_users"
       primary_key: "uuid"
       file_path: "source_bitbucket/schemas/workspace_users.json"
-      page_size: 50
+      page_size: 100
       data_extraction_path: "values"
 
 streams:
