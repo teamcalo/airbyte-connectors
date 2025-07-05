@@ -9,14 +9,14 @@ definitions:
 
   requester:
     type: HttpRequester
-    url_base: https://api.bitbucket.org/2.0
+    url_base: "{{ config['api_url'] or 'https://api.bitbucket.org/2.0' }}"
     http_method: GET
     authenticator:
       type: BasicHttpAuthenticator
       username: "{{ config['email'] }}"
       password: "{{ config['api_token'] }}"
     request_parameters:
-      pagelen: "{{ parameters['page_size'] or 50 }}"
+      pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
     error_handler:
       type: DefaultErrorHandler
       max_retries: 3
@@ -80,7 +80,7 @@ definitions:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ config['workspace'] }}"
         request_parameters:
-          pagelen: "{{ parameters['page_size'] or 50 }}"
+          pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
           sort: "updated_on"
     $parameters:
       name: "repositories"
@@ -118,7 +118,7 @@ definitions:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/pullrequests"
         request_parameters:
-          pagelen: "{{ parameters['page_size'] or 50 }}"
+          pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
           sort: "updated_on"
       partition_router:
         $ref: "#/definitions/pull_requests_stream_router"
@@ -158,7 +158,7 @@ definitions:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/commits"
         request_parameters:
-          pagelen: "{{ parameters['page_size'] or 50 }}"
+          pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
           sort: "-date"
       partition_router:
         $ref: "#/definitions/commits_stream_router"
@@ -200,7 +200,7 @@ definitions:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/deployments"
         request_parameters:
-          pagelen: "{{ parameters['page_size'] or 50 }}"
+          pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
           # Removed sort parameter as Bitbucket deployments API doesn't support last_update_time sorting
       partition_router:
         $ref: "#/definitions/deployments_stream_router"
@@ -214,10 +214,16 @@ definitions:
   # Workspace users stream
   workspace_users_stream:
     $ref: "#/definitions/base_stream"
+    retriever:
+      $ref: "#/definitions/retriever"
+      requester:
+        $ref: "#/definitions/requester"
+        path: "/workspaces/{{ config['workspace'] }}/members"
+        request_parameters:
+          pagelen: "{{ parameters['page_size'] or config['page_size'] or 50 }}"
     $parameters:
       name: "workspace_users"
       primary_key: "uuid"
-      path: "/workspaces/{{ config['workspace'] }}/members"
       file_path: "source_bitbucket/schemas/workspace_users.json"
       page_size: 50
       data_extraction_path: "values"
@@ -259,6 +265,24 @@ spec:
         description: Bitbucket API token (create at bitbucket.org/account/settings/api-tokens)
         title: API Token
         airbyte_secret: true
+      api_url:
+        type: string
+        description: Bitbucket API URL (default is https://api.bitbucket.org/2.0)
+        title: API URL
+        default: "https://api.bitbucket.org/2.0"
+      repositories:
+        type: array
+        items:
+          type: string
+        description: "List of specific repositories to sync (format: workspace/repo-name). If empty, syncs all repositories."
+        title: Repositories
+      page_size:
+        type: integer
+        description: Number of items to fetch per page
+        title: Page Size
+        default: 50
+        minimum: 1
+        maximum: 100
       start_date:
         type: string
         format: date-time
