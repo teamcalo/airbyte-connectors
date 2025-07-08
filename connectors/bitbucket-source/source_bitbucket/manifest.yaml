@@ -7,35 +7,7 @@ definitions:
       type: DpathExtractor
       field_path: ["{{ parameters['data_extraction_path'] }}"]
 
-  # API Budget configuration for Bitbucket rate limiting
-  api_budget:
-    type: HTTPAPIBudget
-    # Note: Bitbucket only provides X-RateLimit-Limit, X-RateLimit-Resource, and X-RateLimit-NearLimit
-    # No X-RateLimit-Reset or X-RateLimit-Remaining headers are available
-    status_codes_for_ratelimit_hit: [429]
-    policies:
-      # Primary policy for repository data access (covers most of our streams)
-      # Based on Bitbucket's 1,000-10,000 requests per hour for /2.0/repositories/* endpoints
-      # Uses rolling/sliding window as per Bitbucket documentation
-      - type: MovingWindowCallRatePolicy
-        rates:
-          - limit: 1000  # Conservative limit, can scale up to 10,000 based on workspace plan
-            interval: "PT1H"  # 1 hour rolling window
-        matchers:
-          - method: "GET"
-            url_base: "https://api.bitbucket.org/2.0"
-            url_path_pattern: "^/repositories/.*"
-      
-      # Policy for workspace-level endpoints (workspace users)
-      # Using the same 1,000 requests per hour rolling window limit
-      - type: MovingWindowCallRatePolicy
-        rates:
-          - limit: 1000
-            interval: "PT1H"  # 1 hour rolling window
-        matchers:
-          - method: "GET"
-            url_base: "https://api.bitbucket.org/2.0"
-            url_path_pattern: "^/workspaces/.*"
+ 
 
   requester:
     type: HttpRequester
@@ -247,6 +219,20 @@ streams:
 check:
   stream_names:
     - "repositories"
+
+ # API Budget configuration for Bitbucket rate limiting
+api_budget:
+  type: HTTPAPIBudget
+  status_codes_for_ratelimit_hit: [429]
+  policies:
+    - type: MovingWindowCallRatePolicy
+      rates:
+        - limit: 1000
+          interval: "PT1H"  # 1 hour rolling window
+      matchers:
+        - method: "GET"
+          url_base: "https://api.bitbucket.org/2.0"
+          url_path_pattern: ".*"
 
 spec:
   type: Spec
