@@ -45,8 +45,6 @@ definitions:
       $ref: "#/definitions/paginator"
     requester:
       $ref: "#/definitions/requester"
-    api_budget:
-      $ref: "#/definitions/api_budget"
 
   schema_loader:
     type: JsonFileSchemaLoader
