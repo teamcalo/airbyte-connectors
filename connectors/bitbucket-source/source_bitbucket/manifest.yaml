@@ -1,4 +1,4 @@
-version: "0.29.0"
+version: "6.58.0"
 
 definitions:
   selector:
@@ -93,23 +93,14 @@ definitions:
     incremental_sync:
       type: DatetimeBasedCursor
       cursor_field: "updated_on"
-      datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
-      start_datetime:
-        type: MinMaxDatetime
-        datetime: "{{ config['start_date'] or '2020-01-01T00:00:00Z' }}"
-        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
-      end_datetime:
-        type: MinMaxDatetime
-        datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
-        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      datetime_format: "%Y-%m-%dT%H:%M:%S.%fZ"
+      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000Z' }}"
+      end_datetime: {{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%fZ') }}
     retriever:
       $ref: "#/definitions/retriever"
       requester:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ config['workspace'] }}"
-        request_parameters:
-          pagelen: "{{ parameters['page_size'] }}"
-          sort: "updated_on"
     $parameters:
       name: "repositories"
       primary_key: "uuid"
@@ -132,22 +123,13 @@ definitions:
       type: DatetimeBasedCursor
       cursor_field: "updated_on"
       datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
-      start_datetime:
-        type: MinMaxDatetime
-        datetime: "{{ config['start_date'] or '2020-01-01T00:00:00Z' }}"
-        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
-      end_datetime:
-        type: MinMaxDatetime
-        datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
-        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000+00:00' }}"
+      end_datetime: {{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}
     retriever:
       $ref: "#/definitions/retriever"
       requester:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/pullrequests"
-        request_parameters:
-          pagelen: "{{ parameters['page_size'] }}"
-          sort: "updated_on"
       partition_router:
         $ref: "#/definitions/pull_requests_stream_router"
     $parameters:
@@ -172,21 +154,13 @@ definitions:
       type: DatetimeBasedCursor
       cursor_field: "date"
       datetime_format: "%Y-%m-%dT%H:%M:%S%z"
-      start_datetime:
-        type: MinMaxDatetime
-        datetime: "{{ config['start_date'] or '2020-01-01T00:00:00Z' }}"
-        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
-      end_datetime:
-        type: MinMaxDatetime
-        datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
-        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00+00:00' }}"
+      end_datetime: {{ now_utc().strftime('%Y-%m-%dT%H:%M:%S%z') }}
     retriever:
       $ref: "#/definitions/retriever"
       requester:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/commits"
-        request_parameters:
-          pagelen: "{{ parameters['page_size'] }}"
       partition_router:
         $ref: "#/definitions/commits_stream_router"
     $parameters:
@@ -210,25 +184,14 @@ definitions:
     incremental_sync:
       type: DatetimeBasedCursor
       cursor_field: "last_update_time"
-      datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
-      start_datetime:
-        type: MinMaxDatetime
-        datetime: "{{ config['start_date'] or '2020-01-01T00:00:00Z' }}"
-        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
-      end_datetime:
-        type: MinMaxDatetime
-        datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
-        datetime_format: "%Y-%m-%dT%H:%M:%SZ"
-      # Note: Bitbucket deployments API may not support time-based filtering
-      # This configuration enables incremental sync on the client side
+      datetime_format: "%Y-%m-%dT%H:%M:%S.%fZ"
+      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000Z' }}"
+      end_datetime: {{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%fZ') }}
     retriever:
       $ref: "#/definitions/retriever"
       requester:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/deployments"
-        request_parameters:
-          pagelen: "{{ parameters['page_size'] }}"
-          # Removed sort parameter as Bitbucket deployments API doesn't support last_update_time sorting
       partition_router:
         $ref: "#/definitions/deployments_stream_router"
     $parameters:
@@ -246,8 +209,6 @@ definitions:
       requester:
         $ref: "#/definitions/requester"
         path: "/workspaces/{{ config['workspace'] }}/members"
-        request_parameters:
-          pagelen: "{{ parameters['page_size'] }}"
     $parameters:
       name: "workspace_users"
       primary_key: "uuid"
