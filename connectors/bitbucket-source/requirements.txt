@@ -1,1 +1,1 @@
-airbyte-cdk==6.58.0
+airbyte-cdk==6.48.10
