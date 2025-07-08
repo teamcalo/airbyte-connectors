@@ -1,4 +1,4 @@
-version: "6.48.10"
+version: "6.58.0"
 
 definitions:
   selector:
@@ -169,7 +169,7 @@ definitions:
     $ref: "#/definitions/base_stream"
     incremental_sync:
       type: DatetimeBasedCursor
-      cursor_field: "last_update_time"
+      cursor_field: "completed_on"
       cursor_datetime_formats:
         - "%Y-%m-%dT%H:%M:%S.%f%z"
         - "%Y-%m-%dT%H:%M:%S%z"

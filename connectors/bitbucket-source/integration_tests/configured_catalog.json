@@ -68,7 +68,7 @@
           "full_refresh",
           "incremental"
         ],
-        "default_cursor_field": ["last_update_time"],
+        "default_cursor_field": ["completed_on"],
         "source_defined_cursor": true,
         "source_defined_primary_key": [
           [
@@ -77,7 +77,7 @@
         ]
       },
       "sync_mode": "incremental",
-      "cursor_field": ["last_update_time"],
+      "cursor_field": ["completed_on"],
       "destination_sync_mode": "append"
     },
     {

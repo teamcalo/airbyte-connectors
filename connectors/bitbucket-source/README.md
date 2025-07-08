@@ -17,7 +17,7 @@ This is a declarative source connector for Bitbucket Cloud that extracts data fr
 | `repositories` | ✅ Yes | `uuid` | `updated_on` | All repositories in the workspace |
 | `pull_requests` | ✅ Yes | `id` | `updated_on` | Pull requests from all repositories |
 | `commits` | ✅ Yes | `hash` | `date` | Commits from all repositories |
-| `deployments` | ✅ Yes | `uuid` | `last_update_time` | Deployments from all repositories |
+| `deployments` | ✅ Yes | `uuid` | `completed_on` | Deployments from all repositories |
 | `workspace_users` | ❌ No | `uuid` | N/A | Users in the workspace |
 
 ## Prerequisites
