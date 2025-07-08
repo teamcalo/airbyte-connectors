@@ -39,7 +39,7 @@ definitions:
 
   requester:
     type: HttpRequester
-    url_base: "{{ config['api_url'] or 'https://api.bitbucket.org/2.0' }}"
+    url_base: "https://api.bitbucket.org/2.0/" # important to keep / at the end, removing it will result in https://api.bitbucket.org/repositories/your-workspace instead of https://api.bitbucket.org/2.0/repositories/your-workspace on cursor pagination
     http_method: GET
     authenticator:
       type: BasicHttpAuthenticator
@@ -60,7 +60,7 @@ definitions:
     type: DefaultPaginator
     pagination_strategy:
       type: CursorPagination
-      cursor_value: "{{ response['next'] or '' }}"
+      cursor_value: "{{ response['next'] }}"
       stop_condition: "{{ not response['next'] }}"
     page_token_option:
       type: RequestPath
@@ -93,9 +93,14 @@ definitions:
     incremental_sync:
       type: DatetimeBasedCursor
       cursor_field: "updated_on"
-      datetime_format: "%Y-%m-%dT%H:%M:%S.%fZ"
-      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000Z' }}"
-      end_datetime: {{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%fZ') }}
+      cursor_datetime_formats:
+        - "%Y-%m-%dT%H:%M:%S.%f%z"
+        - "%Y-%m-%dT%H:%M:%S%z"
+        - "%Y-%m-%dT%H:%M:%S.%fZ"
+        - "%Y-%m-%dT%H:%M:%S%Z"
+      datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
+      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000+00:00' }}"
+      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}"
     retriever:
       $ref: "#/definitions/retriever"
       requester:
@@ -122,9 +127,14 @@ definitions:
     incremental_sync:
       type: DatetimeBasedCursor
       cursor_field: "updated_on"
+      cursor_datetime_formats:
+        - "%Y-%m-%dT%H:%M:%S.%f%z"
+        - "%Y-%m-%dT%H:%M:%S%z"
+        - "%Y-%m-%dT%H:%M:%S.%fZ"
+        - "%Y-%m-%dT%H:%M:%S%Z"
       datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
       start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000+00:00' }}"
-      end_datetime: {{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}
+      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}"
     retriever:
       $ref: "#/definitions/retriever"
       requester:
@@ -153,9 +163,14 @@ definitions:
     incremental_sync:
       type: DatetimeBasedCursor
       cursor_field: "date"
-      datetime_format: "%Y-%m-%dT%H:%M:%S%z"
-      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00+00:00' }}"
-      end_datetime: {{ now_utc().strftime('%Y-%m-%dT%H:%M:%S%z') }}
+      cursor_datetime_formats:
+        - "%Y-%m-%dT%H:%M:%S.%f%z"
+        - "%Y-%m-%dT%H:%M:%S%z"
+        - "%Y-%m-%dT%H:%M:%S.%fZ"
+        - "%Y-%m-%dT%H:%M:%S%Z"
+      datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
+      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000+00:00' }}"
+      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}"
     retriever:
       $ref: "#/definitions/retriever"
       requester:
@@ -184,9 +199,14 @@ definitions:
     incremental_sync:
       type: DatetimeBasedCursor
       cursor_field: "last_update_time"
+      cursor_datetime_formats:
+        - "%Y-%m-%dT%H:%M:%S.%f%z"
+        - "%Y-%m-%dT%H:%M:%S%z"
+        - "%Y-%m-%dT%H:%M:%S.%fZ"
+        - "%Y-%m-%dT%H:%M:%S%Z"
       datetime_format: "%Y-%m-%dT%H:%M:%S.%fZ"
       start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000Z' }}"
-      end_datetime: {{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%fZ') }}
+      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%fZ') }}"
     retriever:
       $ref: "#/definitions/retriever"
       requester:
@@ -253,11 +273,6 @@ spec:
         description: Bitbucket API token (create at bitbucket.org/account/settings/api-tokens)
         title: API Token
         airbyte_secret: true
-      api_url:
-        type: string
-        description: Bitbucket API URL (default is https://api.bitbucket.org/2.0)
-        title: API URL
-        default: "https://api.bitbucket.org/2.0"
       repositories:
         type: array
         items:

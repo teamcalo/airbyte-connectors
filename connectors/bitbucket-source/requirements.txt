@@ -1,1 +1,1 @@
-airbyte-cdk
+airbyte-cdk=6.58.0
