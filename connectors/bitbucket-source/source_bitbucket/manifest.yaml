@@ -1,4 +1,4 @@
-version: "6.48.10"
+version: "6.58.0"
 
 definitions:
   selector:
@@ -120,6 +120,7 @@ definitions:
       - stream: "#/definitions/repositories_stream"
         parent_key: "full_name"
         partition_field: "repository"
+        incremental_dependency: true
 
   pull_requests_stream:
     $ref: "#/definitions/base_stream"
@@ -155,6 +156,7 @@ definitions:
       - stream: "#/definitions/repositories_stream"
         parent_key: "full_name"
         partition_field: "repository"
+        incremental_dependency: true
 
   commits_stream:
     $ref: "#/definitions/base_stream"
@@ -191,6 +193,7 @@ definitions:
       - stream: "#/definitions/repositories_stream"
         parent_key: "full_name"
         partition_field: "repository"
+        incremental_dependency: true
 
   deployments_stream:
     $ref: "#/definitions/base_stream"
@@ -236,9 +239,9 @@ definitions:
 
 streams:
   - "#/definitions/repositories_stream"
-  - "#/definitions/pull_requests_stream"
-  - "#/definitions/commits_stream"
-  - "#/definitions/deployments_stream"
+  # - "#/definitions/pull_requests_stream"
+  # - "#/definitions/commits_stream"
+  # - "#/definitions/deployments_stream"
   - "#/definitions/workspace_users_stream"
 
 check:
