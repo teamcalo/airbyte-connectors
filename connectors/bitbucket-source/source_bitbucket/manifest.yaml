@@ -99,7 +99,7 @@ definitions:
         - "%Y-%m-%dT%H:%M:%S.%fZ"
         - "%Y-%m-%dT%H:%M:%S%Z"
       datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
-      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000+00:00' }}"
+      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%S.%f%z') or '2020-01-01T00:00:00.000000+00:00' }}"
       end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}"
     retriever:
       $ref: "#/definitions/retriever"
@@ -133,7 +133,7 @@ definitions:
         - "%Y-%m-%dT%H:%M:%S.%fZ"
         - "%Y-%m-%dT%H:%M:%S%Z"
       datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
-      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000+00:00' }}"
+      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%S.%f%z') or '2020-01-01T00:00:00.000000+00:00' }}"
       end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}"
     retriever:
       $ref: "#/definitions/retriever"
@@ -168,8 +168,9 @@ definitions:
         - "%Y-%m-%dT%H:%M:%S%z"
         - "%Y-%m-%dT%H:%M:%S.%fZ"
         - "%Y-%m-%dT%H:%M:%S%Z"
+        
       datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
-      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000+00:00' }}"
+      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%S.%f%z') or '2020-01-01T00:00:00.000000+00:00' }}"
       end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}"
     retriever:
       $ref: "#/definitions/retriever"
@@ -205,7 +206,7 @@ definitions:
         - "%Y-%m-%dT%H:%M:%S.%fZ"
         - "%Y-%m-%dT%H:%M:%S%Z"
       datetime_format: "%Y-%m-%dT%H:%M:%S.%fZ"
-      start_datetime: "{{ config['start_date'] or '2020-01-01T00:00:00.000000Z' }}"
+      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%S.%fZ') or '2020-01-01T00:00:00.000000Z' }}"
       end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%fZ') }}"
     retriever:
       $ref: "#/definitions/retriever"
