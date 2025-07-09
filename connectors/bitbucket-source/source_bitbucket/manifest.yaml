@@ -178,7 +178,7 @@ definitions:
       record_selector:
         $ref: "#/definitions/selector"
         record_filter: 
-          condition: "{{ record['version'] >= 3 }}"
+          condition: "{{ record['version'] >= 3 and 'completed_on' in record['state'] }}"
 
     transformations:
       - type: CustomTransformation

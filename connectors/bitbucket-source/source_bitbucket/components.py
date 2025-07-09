@@ -2,8 +2,7 @@
 Custom components for Bitbucket source connector.
 """
 
-import logging
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Dict, Optional
 
 import requests
 from airbyte_cdk.sources.declarative.transformations import RecordTransformation
@@ -15,6 +14,7 @@ class EnrichDeploymentWithEnvironmentTransformation(RecordTransformation):
     Custom transformation that enriches deployment records with environment details
     by making additional API calls to Bitbucket's environments endpoint.
     """
+    config: Config
 
     def __init__(self, config: Optional[Config] = None, **kwargs):
         super().__init__(**kwargs)
@@ -22,13 +22,8 @@ class EnrichDeploymentWithEnvironmentTransformation(RecordTransformation):
         self.config = config or kwargs.get('config', {})
 
         # Extract auth details from config
-        if isinstance(self.config, dict):
-            email = self.config.get("email")
-            api_token = self.config.get("api_token")
-        else:
-            # Handle case where config might have attributes
-            email = getattr(self.config, 'email', None) if self.config else None
-            api_token = getattr(self.config, 'api_token', None) if self.config else None
+        email = self.config.get("email")
+        api_token = self.config.get("api_token")
 
         self._auth = (email, api_token) if email and api_token else None
         self._base_url = "https://api.bitbucket.org/2.0"
@@ -41,18 +36,6 @@ class EnrichDeploymentWithEnvironmentTransformation(RecordTransformation):
         stream_state: Optional[StreamState] = None,
         stream_slice: Optional[StreamSlice] = None,
     ) -> Dict[str, Any]:
-        # Update auth if config is provided and different from instance config
-        if config and config != self.config:
-            if isinstance(config, dict):
-                email = config.get("email")
-                api_token = config.get("api_token")
-            else:
-                email = getattr(config, 'email', None)
-                api_token = getattr(config, 'api_token', None)
-
-            if email and api_token:
-                self._auth = (email, api_token)
-
         # Get the environment UUID from the deployment record
         environment_info = record.get("environment", {})
         environment_uuid = environment_info.get("uuid")
@@ -66,7 +49,6 @@ class EnrichDeploymentWithEnvironmentTransformation(RecordTransformation):
             repository = stream_slice.partition.get("repository")
         elif stream_slice and isinstance(stream_slice, dict):
             repository = stream_slice.get("repository")
-        print(f"Repository from stream slice: {repository}")
         if not repository:
             return record
 
@@ -91,7 +73,6 @@ class EnrichDeploymentWithEnvironmentTransformation(RecordTransformation):
 
         # Construct API URL
         url = f"{self._base_url}/repositories/{repository}/environments/{environment_uuid}"
-        print(f"Fetching environment details from: {url}")
         try:
             # First attempt with clean UUID
             response = requests.get(url, auth=self._auth, timeout=30)
@@ -99,7 +80,7 @@ class EnrichDeploymentWithEnvironmentTransformation(RecordTransformation):
             if response.status_code == 200:
                 environment_data = response.json()
                 self._environment_cache[cache_key] = environment_data
-                print(f"Environment details fetched successfully: {environment_data}")
+
                 return environment_data
 
             else:
