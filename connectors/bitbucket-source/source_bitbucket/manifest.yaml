@@ -26,7 +26,7 @@ definitions:
       response_filters:
         - type: HttpResponseFilter
           action: RETRY
-          http_codes: [429, 500, 502, 503, 504]
+          http_codes: [500, 502, 503, 504]
 
   paginator:
     type: DefaultPaginator
@@ -175,11 +175,18 @@ definitions:
           sort: "-state.completed_on"
       partition_router:
         $ref: "#/definitions/deployments_stream_router"
+      record_selector:
+        $ref: "#/definitions/selector"
+        record_filter: 
+          condition: "{{ record['state']['type'] != 'deployment_state_undeployed' }}"
+
     transformations:
+      - type: CustomTransformation
+        class_name: source_bitbucket.components.EnrichDeploymentWithEnvironmentTransformation
       - type: AddFields
         fields:
           - path: ["cursor_at"]
-            value: "{% if record['state']['completed_on'] %}{{ format_datetime(record['state']['completed_on'], '%Y-%m-%dT%H:%M:%SZ') }}{% else %}{{ record['state']['completed_on'] }}{% endif %}"
+            value: "{{ format_datetime(record['state']['completed_on'] if record['version'] == 3 else record['created_on'], '%Y-%m-%dT%H:%M:%SZ') }}"
 
     $parameters:
       name: "deployments"
@@ -221,12 +228,23 @@ api_budget:
   policies:
     - type: MovingWindowCallRatePolicy
       rates:
+        - limit: 500
+          interval: "PT1H"  # 1 hour rolling window
+      matchers:
+        - method: "GET"
+          url_base: "https://api.bitbucket.org/2.0"
+          url_path_pattern: ".*deployments.*"
+    - type: MovingWindowCallRatePolicy
+      rates:
         - limit: 1000
           interval: "PT1H"  # 1 hour rolling window
       matchers:
         - method: "GET"
           url_base: "https://api.bitbucket.org/2.0"
-          url_path_pattern: ".*"
+          url_path_pattern: ".*(commits|pullrequests).*"
+        - method: "GET"
+          url_base: "https://api.bitbucket.org/2.0"
+          url_path_pattern: "^/(workspaces|repositories).*"
 
 spec:
   type: Spec

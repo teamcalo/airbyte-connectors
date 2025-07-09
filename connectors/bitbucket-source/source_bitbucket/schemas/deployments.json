@@ -38,6 +38,54 @@
         },
         "type": {
           "type": "string"
+        },
+        "slug": {
+          "type": "string",
+          "description": "Environment slug identifier"
+        },
+        "category": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "description": "Environment category information"
+        },
+        "environment_type": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "rank": {
+              "type": "integer"
+            }
+          },
+          "description": "Environment type details"
+        },
+        "environment_lock_enabled": {
+          "type": "boolean",
+          "description": "Whether environment locking is enabled"
+        },
+        "deployment_gate_enabled": {
+          "type": "boolean",
+          "description": "Whether deployment gates are enabled"
+        },
+        "rank": {
+          "type": "integer",
+          "description": "Environment rank/priority"
+        },
+        "hidden": {
+          "type": "boolean",
+          "description": "Whether the environment is hidden"
+        },
+        "restriction_type": {
+          "type": "string",
+          "description": "Environment access restriction type"
         }
       }
     },
