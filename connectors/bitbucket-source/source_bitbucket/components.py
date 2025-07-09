@@ -41,7 +41,6 @@ class EnrichDeploymentWithEnvironmentTransformation(RecordTransformation):
         stream_state: Optional[StreamState] = None,
         stream_slice: Optional[StreamSlice] = None,
     ) -> Dict[str, Any]:
-        if 'last_update_time' not in record:
         # Update auth if config is provided and different from instance config
         if config and config != self.config:
             if isinstance(config, dict):
@@ -67,6 +66,7 @@ class EnrichDeploymentWithEnvironmentTransformation(RecordTransformation):
             repository = stream_slice.partition.get("repository")
         elif stream_slice and isinstance(stream_slice, dict):
             repository = stream_slice.get("repository")
+        print(f"Repository from stream slice: {repository}")
         if not repository:
             return record
 
@@ -91,6 +91,7 @@ class EnrichDeploymentWithEnvironmentTransformation(RecordTransformation):
 
         # Construct API URL
         url = f"{self._base_url}/repositories/{repository}/environments/{environment_uuid}"
+        print(f"Fetching environment details from: {url}")
         try:
             # First attempt with clean UUID
             response = requests.get(url, auth=self._auth, timeout=30)
@@ -98,6 +99,7 @@ class EnrichDeploymentWithEnvironmentTransformation(RecordTransformation):
             if response.status_code == 200:
                 environment_data = response.json()
                 self._environment_cache[cache_key] = environment_data
+                print(f"Environment details fetched successfully: {environment_data}")
                 return environment_data
 
             else:
