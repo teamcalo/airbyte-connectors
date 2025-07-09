@@ -60,17 +60,6 @@ definitions:
   # Repositories stream - lists all repositories in a workspace
   repositories_stream:
     $ref: "#/definitions/base_stream"
-    incremental_sync:
-      type: DatetimeBasedCursor
-      cursor_field: "updated_on"
-      cursor_datetime_formats:
-        - "%Y-%m-%dT%H:%M:%S.%f%z"
-        - "%Y-%m-%dT%H:%M:%S%z"
-        - "%Y-%m-%dT%H:%M:%S.%fZ"
-        - "%Y-%m-%dT%H:%M:%S%Z"
-      datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
-      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%S.%f%z') or '2020-01-01T00:00:00.000000+00:00' }}"
-      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}"
     retriever:
       $ref: "#/definitions/retriever"
       requester:
@@ -96,22 +85,25 @@ definitions:
     $ref: "#/definitions/base_stream"
     incremental_sync:
       type: DatetimeBasedCursor
-      cursor_field: "updated_on"
-      cursor_datetime_formats:
-        - "%Y-%m-%dT%H:%M:%S.%f%z"
-        - "%Y-%m-%dT%H:%M:%S%z"
-        - "%Y-%m-%dT%H:%M:%S.%fZ"
-        - "%Y-%m-%dT%H:%M:%S%Z"
-      datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
-      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%S.%f%z') or '2020-01-01T00:00:00.000000+00:00' }}"
-      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}"
+      cursor_field: "cursor_at"
+      datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%SZ') or '2020-01-01T00:00:00Z' }}"
+      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
+      is_client_side_incremental: true
     retriever:
       $ref: "#/definitions/retriever"
       requester:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/pullrequests"
+        request_parameters:
+          sort: "-updated_on"
       partition_router:
         $ref: "#/definitions/pull_requests_stream_router"
+    transformations:
+      - type: AddFields
+        fields:
+          - path: ["cursor_at"]
+            value: "{{ format_datetime(record['updated_on'], '%Y-%m-%dT%H:%M:%SZ') }}"
     $parameters:
       name: "pull_requests"
       primary_key: "id"
@@ -132,16 +124,11 @@ definitions:
     $ref: "#/definitions/base_stream"
     incremental_sync:
       type: DatetimeBasedCursor
-      cursor_field: "date"
-      cursor_datetime_formats:
-        - "%Y-%m-%dT%H:%M:%S.%f%z"
-        - "%Y-%m-%dT%H:%M:%S%z"
-        - "%Y-%m-%dT%H:%M:%S.%fZ"
-        - "%Y-%m-%dT%H:%M:%S%Z"
-        
-      datetime_format: "%Y-%m-%dT%H:%M:%S.%f%z"
-      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%S.%f%z') or '2020-01-01T00:00:00.000000+00:00' }}"
-      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}"
+      cursor_field: "cursor_at"
+      datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%SZ') or '2020-01-01T00:00:00Z' }}"
+      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
+      is_client_side_incremental: true
     retriever:
       $ref: "#/definitions/retriever"
       requester:
@@ -149,6 +136,11 @@ definitions:
         path: "/repositories/{{ stream_partition.repository }}/commits"
       partition_router:
         $ref: "#/definitions/commits_stream_router"
+    transformations:
+      - type: AddFields
+        fields:
+          - path: ["cursor_at"]
+            value: "{{ format_datetime(record['date'], '%Y-%m-%dT%H:%M:%SZ') }}"
     $parameters:
       name: "commits"
       primary_key: "hash"
@@ -169,22 +161,26 @@ definitions:
     $ref: "#/definitions/base_stream"
     incremental_sync:
       type: DatetimeBasedCursor
-      cursor_field: "completed_on"
-      cursor_datetime_formats:
-        - "%Y-%m-%dT%H:%M:%S.%f%z"
-        - "%Y-%m-%dT%H:%M:%S%z"
-        - "%Y-%m-%dT%H:%M:%S.%fZ"
-        - "%Y-%m-%dT%H:%M:%S%Z"
-      datetime_format: "%Y-%m-%dT%H:%M:%S.%fZ"
-      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%S.%fZ') or '2020-01-01T00:00:00.000000Z' }}"
-      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%S.%fZ') }}"
+      cursor_field: "cursor_at"
+      datetime_format: "%Y-%m-%dT%H:%M:%SZ"
+      start_datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%dT%H:%M:%SZ') or '2020-01-01T00:00:00Z' }}"
+      end_datetime: "{{ now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
+      is_client_side_incremental: true
     retriever:
       $ref: "#/definitions/retriever"
       requester:
         $ref: "#/definitions/requester"
         path: "/repositories/{{ stream_partition.repository }}/deployments"
+        request_parameters:
+          sort: "-state.completed_on"
       partition_router:
         $ref: "#/definitions/deployments_stream_router"
+    transformations:
+      - type: AddFields
+        fields:
+          - path: ["cursor_at"]
+            value: "{% if record['state']['completed_on'] %}{{ format_datetime(record['state']['completed_on'], '%Y-%m-%dT%H:%M:%SZ') }}{% else %}{{ record['state']['completed_on'] }}{% endif %}"
+
     $parameters:
       name: "deployments"
       primary_key: "uuid"

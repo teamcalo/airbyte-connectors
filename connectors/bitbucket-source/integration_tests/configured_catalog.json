@@ -5,20 +5,16 @@
         "name": "repositories",
         "json_schema": {},
         "supported_sync_modes": [
-          "full_refresh",
-          "incremental"
+          "full_refresh"
         ],
-        "default_cursor_field": ["updated_on"],
-        "source_defined_cursor": true,
         "source_defined_primary_key": [
           [
             "uuid"
           ]
         ]
       },
-      "sync_mode": "incremental",
-      "cursor_field": ["updated_on"],
-      "destination_sync_mode": "append"
+      "sync_mode": "full_refresh",
+      "destination_sync_mode": "overwrite"
     },
     {
       "stream": {
