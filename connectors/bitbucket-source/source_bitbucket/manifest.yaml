@@ -211,11 +211,11 @@ definitions:
       data_extraction_path: "values"
 
 streams:
-  # - "#/definitions/repositories_stream"
-  # - "#/definitions/pull_requests_stream"
-  # - "#/definitions/commits_stream"
+  - "#/definitions/repositories_stream"
+  - "#/definitions/pull_requests_stream"
+  - "#/definitions/commits_stream"
   - "#/definitions/deployments_stream"
-  # - "#/definitions/workspace_users_stream"
+  - "#/definitions/workspace_users_stream"
 
 check:
   stream_names:
