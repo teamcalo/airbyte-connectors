@@ -178,7 +178,7 @@ definitions:
       record_selector:
         $ref: "#/definitions/selector"
         record_filter: 
-          condition: "{{ record['state']['type'] != 'deployment_state_undeployed' }}"
+          condition: "{{ record['version'] >= 3 }}"
 
     transformations:
       - type: CustomTransformation
@@ -186,7 +186,7 @@ definitions:
       - type: AddFields
         fields:
           - path: ["cursor_at"]
-            value: "{{ format_datetime(record['state']['completed_on'] if record['version'] == 3 else record['created_on'], '%Y-%m-%dT%H:%M:%SZ') }}"
+            value: "{{ format_datetime(record['state']['completed_on'], '%Y-%m-%dT%H:%M:%SZ') }}"
 
     $parameters:
       name: "deployments"
@@ -211,11 +211,11 @@ definitions:
       data_extraction_path: "values"
 
 streams:
-  - "#/definitions/repositories_stream"
-  - "#/definitions/pull_requests_stream"
-  - "#/definitions/commits_stream"
+  # - "#/definitions/repositories_stream"
+  # - "#/definitions/pull_requests_stream"
+  # - "#/definitions/commits_stream"
   - "#/definitions/deployments_stream"
-  - "#/definitions/workspace_users_stream"
+  # - "#/definitions/workspace_users_stream"
 
 check:
   stream_names:

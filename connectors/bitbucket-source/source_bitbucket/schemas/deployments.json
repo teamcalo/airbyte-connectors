@@ -10,22 +10,62 @@
       "type": "string",
       "description": "Deployment key"
     },
-    "version": {
-      "type": "integer",
-      "description": "Deployment version number"
-    },
     "name": {
       "type": "string",
       "description": "Deployment name"
+    },
+    "number": {
+      "type": "integer",
+      "description": "Deployment number"
     },
     "url": {
       "type": ["string", "null"],
       "description": "Deployment URL"
     },
     "state": {
-      "type": "string",
-      "enum": ["IN_PROGRESS", "SUCCESSFUL", "FAILED", "STOPPED", "UNDEPLOYED"],
-      "description": "Deployment state"
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "status": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "started_on": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_on": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_successful_deployment": {
+          "type": ["object", "null"],
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "uuid": {
+              "type": "string"
+            }
+          }
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "description": "Deployment state details"
     },
     "environment": {
       "type": "object",
@@ -75,6 +115,59 @@
           "type": "boolean",
           "description": "Whether deployment gates are enabled"
         },
+        "lock": {
+          "type": ["object", "null"],
+          "properties": {
+            "lock_opener": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "pipeline_uuid": {
+                  "type": "string"
+                },
+                "deployment_group_uuid": {
+                  "type": "string"
+                },
+                "step_uuid": {
+                  "type": "string"
+                }
+              }
+            },
+            "triggerer": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "pipeline_uuid": {
+                  "type": "string"
+                },
+                "step_uuid": {
+                  "type": "string"
+                }
+              }
+            },
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        },
+        "restrictions": {
+          "type": ["object", "null"],
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "admin_only": {
+              "type": "boolean"
+            }
+          }
+        },
         "rank": {
           "type": "integer",
           "description": "Environment rank/priority"
@@ -82,40 +175,28 @@
         "hidden": {
           "type": "boolean",
           "description": "Whether the environment is hidden"
-        },
-        "restriction_type": {
-          "type": "string",
-          "description": "Environment access restriction type"
         }
       }
     },
     "release": {
       "type": "object",
       "properties": {
+        "type": {
+          "type": "string"
+        },
         "uuid": {
           "type": "string"
         },
-        "name": {
-          "type": "string"
-        },
-        "url": {
-          "type": ["string", "null"]
-        },
-        "commit": {
+        "pipeline": {
           "type": "object",
           "properties": {
-            "hash": {
+            "uuid": {
+              "type": "string"
+            },
+            "type": {
               "type": "string"
             }
           }
-        }
-      }
-    },
-    "deployable": {
-      "type": "object",
-      "properties": {
-        "uuid": {
-          "type": "string"
         },
         "key": {
           "type": "string"
@@ -131,8 +212,103 @@
           "properties": {
             "hash": {
               "type": "string"
+            },
+            "links": {
+              "type": "object",
+              "properties": {
+                "self": {
+                  "type": "object",
+                  "properties": {
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "html": {
+                  "type": "object",
+                  "properties": {
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "type": {
+              "type": "string"
             }
           }
+        },
+        "created_on": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "deployable": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "uuid": {
+          "type": "string"
+        },
+        "pipeline": {
+          "type": "object",
+          "properties": {
+            "uuid": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": ["string", "null"]
+        },
+        "commit": {
+          "type": "object",
+          "properties": {
+            "hash": {
+              "type": "string"
+            },
+            "links": {
+              "type": "object",
+              "properties": {
+                "self": {
+                  "type": "object",
+                  "properties": {
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "html": {
+                  "type": "object",
+                  "properties": {
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        },
+        "created_on": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -141,25 +317,30 @@
       "format": "date-time",
       "description": "Last update timestamp"
     },
+    "created_on": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp"
+    },
+    "last_update_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp"
+    },
+    "version": {
+      "type": "integer",
+      "description": "Deployment version"
+    },
+    "cursor_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Cursor timestamp"
+    },
     "step": {
       "type": ["object", "null"],
       "properties": {
         "uuid": {
           "type": "string"
-        },
-        "trigger_type": {
-          "type": "string"
-        },
-        "state": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "type": {
-              "type": "string"
-            }
-          }
         }
       }
     },
