@@ -186,7 +186,7 @@ definitions:
       - type: AddFields
         fields:
           - path: ["cursor_at"]
-            value: "{{ 'completed_on' in record['state'] and format_datetime(record['state']['completed_on'], '%Y-%m-%dT%H:%M:%SZ') }}"
+            value: "{{ format_datetime(record['state']['completed_on'], '%Y-%m-%dT%H:%M:%SZ') if 'completed_on' in record['state'] else now_utc().strftime('%Y-%m-%dT%H:%M:%SZ') }}"
 
     $parameters:
       name: "deployments"
