@@ -145,6 +145,11 @@
     "type": {
       "type": "string",
       "description": "Object type (commit)"
+    },
+    "cursor_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Cursor field for incremental sync"
     }
   }
 }
