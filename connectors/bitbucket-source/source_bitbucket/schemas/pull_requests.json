@@ -239,6 +239,11 @@
     "type": {
       "type": "string",
       "description": "Object type (pullrequest)"
+    },
+    "cursor_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Cursor timestamp"
     }
   }
 }

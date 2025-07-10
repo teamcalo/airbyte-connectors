@@ -149,7 +149,7 @@
     "cursor_at": {
       "type": "string",
       "format": "date-time",
-      "description": "Cursor field for incremental sync"
+      "description": "Cursor timestamp"
     }
   }
 }

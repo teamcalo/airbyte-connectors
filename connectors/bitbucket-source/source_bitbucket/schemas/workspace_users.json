@@ -2,42 +2,113 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "uuid": {
+    "type": {
       "type": "string",
-      "description": "User UUID"
+      "description": "Object type (workspace_membership)"
     },
-    "username": {
-      "type": "string",
-      "description": "Username"
+    "user": {
+      "type": "object",
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "description": "User display name"
+        },
+        "links": {
+          "type": "object",
+          "properties": {
+            "self": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            },
+            "avatar": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            },
+            "html": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "description": "Object type (user)"
+        },
+        "uuid": {
+          "type": "string",
+          "description": "User UUID"
+        },
+        "account_id": {
+          "type": "string",
+          "description": "User account ID"
+        },
+        "nickname": {
+          "type": "string",
+          "description": "User nickname"
+        }
+      }
     },
-    "nickname": {
-      "type": "string",
-      "description": "User nickname"
-    },
-    "display_name": {
-      "type": "string",
-      "description": "Display name"
-    },
-    "account_status": {
-      "type": "string",
-      "description": "Account status"
-    },
-    "website": {
-      "type": ["string", "null"],
-      "description": "User website"
-    },
-    "location": {
-      "type": ["string", "null"],
-      "description": "User location"
-    },
-    "created_on": {
-      "type": "string",
-      "format": "date-time",
-      "description": "Account creation timestamp"
-    },
-    "has_2fa_enabled": {
-      "type": "boolean",
-      "description": "Whether 2FA is enabled"
+    "workspace": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Object type (workspace)"
+        },
+        "uuid": {
+          "type": "string",
+          "description": "Workspace UUID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Workspace name"
+        },
+        "slug": {
+          "type": "string",
+          "description": "Workspace slug"
+        },
+        "links": {
+          "type": "object",
+          "properties": {
+            "avatar": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            },
+            "html": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            },
+            "self": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "links": {
       "type": "object",
@@ -49,52 +120,8 @@
               "type": "string"
             }
           }
-        },
-        "html": {
-          "type": "object",
-          "properties": {
-            "href": {
-              "type": "string"
-            }
-          }
-        },
-        "avatar": {
-          "type": "object",
-          "properties": {
-            "href": {
-              "type": "string"
-            }
-          }
-        },
-        "repositories": {
-          "type": "object",
-          "properties": {
-            "href": {
-              "type": "string"
-            }
-          }
-        },
-        "following": {
-          "type": "object",
-          "properties": {
-            "href": {
-              "type": "string"
-            }
-          }
-        },
-        "followers": {
-          "type": "object",
-          "properties": {
-            "href": {
-              "type": "string"
-            }
-          }
         }
       }
-    },
-    "type": {
-      "type": "string",
-      "description": "Object type (user)"
     }
   }
 }
