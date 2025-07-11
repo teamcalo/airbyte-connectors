@@ -7,8 +7,6 @@ definitions:
       type: DpathExtractor
       field_path: ["{{ parameters['data_extraction_path'] }}"]
 
- 
-
   requester:
     type: HttpRequester
     url_base: "https://api.bitbucket.org/2.0/" # important to keep / at the end, removing it will result in https://api.bitbucket.org/repositories/your-workspace instead of https://api.bitbucket.org/2.0/repositories/your-workspace on cursor pagination
@@ -19,14 +17,14 @@ definitions:
       password: "{{ config['api_token'] }}"
     error_handler:
       type: DefaultErrorHandler
-      max_retries: 3
+      max_retries: 100
       backoff_strategies:
         - type: ExponentialBackoffStrategy
-          factor: 4
+          factor: 5
       response_filters:
         - type: HttpResponseFilter
           action: RETRY
-          http_codes: [500, 502, 503, 504]
+          http_codes: [429, 500, 502, 503, 504]
 
   paginator:
     type: DefaultPaginator
@@ -36,6 +34,10 @@ definitions:
       stop_condition: "{{ not response['next'] }}"
     page_token_option:
       type: RequestPath
+    page_size_option:
+      type: RequestOption
+      inject_into: request_parameter
+      field_name: pagelen
 
   retriever:
     type: SimpleRetriever
@@ -177,7 +179,7 @@ definitions:
         $ref: "#/definitions/deployments_stream_router"
       record_selector:
         $ref: "#/definitions/selector"
-        record_filter: 
+        record_filter:
           condition: "{{ record['version'] >= 3 and 'completed_on' in record['state'] }}"
 
     transformations:
@@ -221,30 +223,25 @@ check:
   stream_names:
     - "repositories"
 
- # API Budget configuration for Bitbucket rate limiting
+  # API Budget configuration for Bitbucket rate limiting
 api_budget:
   type: HTTPAPIBudget
   status_codes_for_ratelimit_hit: [429]
   policies:
     - type: MovingWindowCallRatePolicy
       rates:
-        - limit: 500
-          interval: "PT1H"  # 1 hour rolling window
+        - limit: 15
+          interval: "PT1M"
+        - limit: 900
+          interval: "PT1H"
       matchers:
         - method: "GET"
-          url_base: "https://api.bitbucket.org/2.0"
-          url_path_pattern: ".*deployments.*"
-    - type: MovingWindowCallRatePolicy
-      rates:
-        - limit: 1000
-          interval: "PT1H"  # 1 hour rolling window
-      matchers:
-        - method: "GET"
-          url_base: "https://api.bitbucket.org/2.0"
-          url_path_pattern: ".*(commits|pullrequests).*"
-        - method: "GET"
-          url_base: "https://api.bitbucket.org/2.0"
-          url_path_pattern: "^/(workspaces|repositories).*"
+          url_base: "https://api.bitbucket.org/2.0/"
+
+concurrency_level:
+  type: ConcurrencyLevel
+  default_concurrency: 10
+  max_concurrency: 10
 
 spec:
   type: Spec
@@ -282,7 +279,7 @@ spec:
         type: integer
         description: Number of items to fetch per page
         title: Page Size
-        default: 50
+        default: 100
         minimum: 1
         maximum: 100
       start_date:
