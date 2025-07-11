@@ -238,11 +238,6 @@ api_budget:
         - method: "GET"
           url_base: "https://api.bitbucket.org/2.0/"
 
-concurrency_level:
-  type: ConcurrencyLevel
-  default_concurrency: 10
-  max_concurrency: 10
-
 spec:
   type: Spec
   documentation_url: https://docs.airbyte.com/integrations/sources/bitbucket
