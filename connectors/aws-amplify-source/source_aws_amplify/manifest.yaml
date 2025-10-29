@@ -17,12 +17,14 @@ definitions:
         auth_type_credentials:
           type: CustomAuthenticator
           class_name: source_aws_amplify.components.IAMCredentialsAuthenticator
-          access_key_id: "{{ config['auth_type']['access_key_id'] }}"
-          secret_access_key: "{{ config['auth_type']['secret_access_key'] }}"
+          parameters:
+            access_key_id: "{{ config['auth_type']['access_key_id'] }}"
+            secret_access_key: "{{ config['auth_type']['secret_access_key'] }}"
         auth_type_role:
           type: CustomAuthenticator
           class_name: source_aws_amplify.components.IAMRoleAuthenticator
-          assume_role: "{{ config['auth_type']['assume_role'] }}"
+          parameters:
+            assume_role: "{{ config['auth_type']['assume_role'] }}"
       authenticator_selection_path:
         - auth_type
         - type
