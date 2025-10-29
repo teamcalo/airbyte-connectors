@@ -154,6 +154,10 @@ spec:
         oneOf:
           - type: object
             title: IAM Credentials
+            required:
+              - type
+              - access_key_id
+              - secret_access_key
             properties:
               type:
                 type: string
@@ -169,6 +173,7 @@ spec:
           - type: object
             title: IAM Role
             required:
+              - type
               - assume_role
             properties:
               type:

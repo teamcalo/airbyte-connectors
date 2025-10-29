@@ -1,5 +1,11 @@
 name: CD
 
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.stage }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
 on:
   push:
     branches:
