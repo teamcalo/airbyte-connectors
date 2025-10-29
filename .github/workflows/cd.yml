@@ -1,4 +1,4 @@
-name: Publish Connector Images
+name: CD
 
 on:
   push:
@@ -45,10 +45,12 @@ jobs:
         id: build-push
         uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.connector }}
+          context: .
           push: true
           platforms: linux/arm64
           file: ./Dockerfile
+          build-args: |
+            CONNECTOR_PATH=${{ matrix.connector }}
           tags: |
             ${{ vars.DOCKER_USERNAME }}/${{ steps.connector.outputs.name }}:latest
             ${{ vars.DOCKER_USERNAME }}/${{ steps.connector.outputs.name }}:${{ github.run_number }}

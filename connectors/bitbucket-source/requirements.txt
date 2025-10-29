@@ -1,2 +1,2 @@
-airbyte-cdk==6.58.0
+airbyte-cdk
 requests>=2.31.0
