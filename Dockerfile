@@ -1,5 +1,5 @@
 
-FROM airbyte/python-connector-base:4.1.0
+FROM airbyte/python-connector-base:4.0.0
 
 ARG CONNECTOR_PATH
 ENV AIRBYTE_ENTRYPOINT="python /airbyte/main.py"
