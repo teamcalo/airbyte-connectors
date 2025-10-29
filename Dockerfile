@@ -1,5 +1,5 @@
 
-FROM airbyte/python-connector-base:4.0.0
+FROM --platform=arm64 airbyte/python-connector-base:4.1.0
 
 COPY . /airbyte
 RUN pip3 install --no-cache-dir -r /airbyte/requirements.txt

@@ -47,6 +47,7 @@ jobs:
         with:
           context: ${{ matrix.connector }}
           push: true
+          platforms: linux/arm64
           file: ./Dockerfile
           tags: |
             ${{ vars.DOCKER_USERNAME }}/${{ steps.connector.outputs.name }}:latest
