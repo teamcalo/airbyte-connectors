@@ -6,7 +6,7 @@ import requests
 from airbyte_cdk.sources.declarative.auth.declarative_authenticator import DeclarativeAuthenticator
 from airbyte_cdk.sources.declarative.interpolation import InterpolatedString
 from airbyte_cdk.sources.declarative.transformations import RecordTransformation
-from airbyte_cdk.sources.declarative.types import Config, Record, StreamSlice, StreamState
+from airbyte_cdk.sources.types import Config, Record, StreamSlice, StreamState
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from typing import Union, Mapping, Any, Optional
@@ -36,6 +36,7 @@ class BaseIAMAuthenticator(DeclarativeAuthenticator, ABC):
 class IAMCredentialsAuthenticator(BaseIAMAuthenticator):
     access_key_id: Union[InterpolatedString, str]
     secret_access_key: Union[InterpolatedString, str]
+    config: Config
 
     def sign(self):
         region = self.config.get("region", "us-east-1")
@@ -57,6 +58,7 @@ class IAMCredentialsAuthenticator(BaseIAMAuthenticator):
 @dataclass
 class IAMRoleAuthenticator(BaseIAMAuthenticator):
     assume_role: Union[InterpolatedString, str]
+    config: Config
 
     def sign(self):
         region = self.config.get("region", "us-east-1")
