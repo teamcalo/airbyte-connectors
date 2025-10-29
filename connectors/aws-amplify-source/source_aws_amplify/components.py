@@ -34,9 +34,9 @@ class BaseIAMAuthenticator(DeclarativeAuthenticator, ABC):
 
 @dataclass
 class IAMCredentialsAuthenticator(BaseIAMAuthenticator):
-    access_key_id: Union[InterpolatedString, str]
-    secret_access_key: Union[InterpolatedString, str]
     config: Config
+    access_key_id: Optional[Union[InterpolatedString, str]] = None
+    secret_access_key: Optional[Union[InterpolatedString, str]] = None
 
     def sign(self):
         region = self.config.get("region", "us-east-1")
@@ -49,22 +49,22 @@ class IAMCredentialsAuthenticator(BaseIAMAuthenticator):
         return session.get_credentials()
 
     def __post_init__(self, parameters: Mapping[str, Any]):
-        if isinstance(self.access_key_id, str):
+        if self.access_key_id and isinstance(self.access_key_id, str):
             self.access_key_id = InterpolatedString(self.access_key_id, parameters=parameters)
-        if isinstance(self.secret_access_key, str):
+        if self.secret_access_key and isinstance(self.secret_access_key, str):
             self.secret_access_key = InterpolatedString(self.secret_access_key, parameters=parameters)
 
 
 @dataclass
 class IAMRoleAuthenticator(BaseIAMAuthenticator):
-    assume_role: Union[InterpolatedString, str]
     config: Config
+    assume_role: Optional[Union[InterpolatedString, str]] = None
 
     def sign(self):
         region = self.config.get("region", "us-east-1")
         sts_client = boto3.client("sts", region_name=region)
         response = sts_client.assume_role(
-            RoleArn=str(self.assume_role.eval(self.config)), 
+            RoleArn=str(self.assume_role.eval(self.config)),
             RoleSessionName="CrossAcctSession"
         )
         credentials = response['Credentials']
@@ -77,7 +77,7 @@ class IAMRoleAuthenticator(BaseIAMAuthenticator):
         return session.get_credentials()
 
     def __post_init__(self, parameters: Mapping[str, Any]):
-        if isinstance(self.assume_role, str):
+        if self.assume_role and isinstance(self.assume_role, str):
             self.assume_role = InterpolatedString(self.assume_role, parameters=parameters)
 
 
