@@ -1,8 +1,5 @@
-#
-# Copyright (c) 2024 Airbyte, Inc., all rights reserved.
-#
 
 
-from .source import SourceAmplify
+from .source import SourceAwsAmplify
 
-__all__ = ["SourceAmplify"]
+__all__ = ["SourceAwsAmplify"]

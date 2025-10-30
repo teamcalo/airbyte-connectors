@@ -1,2 +1,5 @@
+airbyte-cdk==7.4.1
+
 boto3
-airbyte-cdk==6.61.6
+botocore
+requests

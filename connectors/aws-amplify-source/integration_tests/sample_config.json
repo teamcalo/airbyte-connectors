@@ -1,8 +1,0 @@
-{
-  "region": "us-east-1",
-  "limit": 100,
-  "auth_type": {
-    "type": "auth_type_role",
-    "role_to_assume": "arn:aws:iam::123456789012:role/role-name"
-  }
-}

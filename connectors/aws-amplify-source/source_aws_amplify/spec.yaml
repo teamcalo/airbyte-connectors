@@ -1,0 +1,79 @@
+documentationUrl: https://docs.airbyte.com/integrations/sources/aws-amplify
+connectionSpecification:
+  $schema: http://json-schema.org/draft-07/schema#
+  title: AWS Amplify Source Spec
+  type: object
+  required:
+    - region
+    - auth_type
+  additionalProperties: true
+  properties:
+    region:
+      type: string
+      title: AWS Region
+      description: The AWS region where your Amplify applications are located (e.g., us-east-1, us-west-2, eu-west-1).
+      examples:
+        - us-east-1
+        - us-west-2
+        - eu-west-1
+      order: 0
+    auth_type:
+      type: object
+      title: Authentication Method
+      description: Choose how to authenticate with AWS Amplify API.
+      oneOf:
+        - type: object
+          title: IAM Credentials
+          description: Authenticate using AWS IAM access key and secret key.
+          required:
+            - type
+            - access_key_id
+            - secret_access_key
+          properties:
+            type:
+              type: string
+              const: auth_type_credentials
+              order: 0
+            access_key_id:
+              type: string
+              title: Access Key ID
+              description: Your AWS IAM access key ID. You can find this in the AWS IAM console.
+              airbyte_secret: true
+              order: 1
+            secret_access_key:
+              type: string
+              title: Secret Access Key
+              description: Your AWS IAM secret access key. You can find this in the AWS IAM console.
+              airbyte_secret: true
+              order: 2
+        - type: object
+          title: IAM Role
+          description: Authenticate by assuming an AWS IAM role.
+          required:
+            - type
+            - assume_role
+          properties:
+            type:
+              type: string
+              const: auth_type_role
+              order: 0
+            assume_role:
+              type: string
+              title: Role ARN
+              description: The ARN of the IAM role to assume (e.g., arn:aws:iam::123456789012:role/AmplifyReadRole).
+              examples:
+                - arn:aws:iam::123456789012:role/AmplifyReadRole
+              order: 1
+            access_key_id:
+              type: string
+              title: Access Key ID (Optional)
+              description: Optional AWS IAM access key ID for assuming the role. If not provided, will use default AWS credentials chain.
+              airbyte_secret: true
+              order: 2
+            secret_access_key:
+              type: string
+              title: Secret Access Key (Optional)
+              description: Optional AWS IAM secret access key for assuming the role. If not provided, will use default AWS credentials chain.
+              airbyte_secret: true
+              order: 3
+      order: 1
