@@ -102,6 +102,10 @@ class AppsStream(AmplifyStream):
     primary_key = "appId"
     data_field = "apps"
 
+    @property
+    def name(self) -> str:
+        return "apps"
+
     def path(
         self,
         stream_state: Mapping[str, Any] = None,
@@ -122,6 +126,10 @@ class BranchesStream(AmplifyStream):
 
     primary_key = "branchName"
     data_field = "branches"
+
+    @property
+    def name(self) -> str:
+        return "branches"
 
     def __init__(self, parent_stream: AppsStream, **kwargs):
         super().__init__(**kwargs)
@@ -172,6 +180,10 @@ class JobsStream(AmplifyStream):
 
     primary_key = "jobId"
     data_field = "jobSummaries"
+
+    @property
+    def name(self) -> str:
+        return "jobs"
 
     def __init__(self, parent_streams: Mapping[str, AmplifyStream], **kwargs):
         super().__init__(**kwargs)
