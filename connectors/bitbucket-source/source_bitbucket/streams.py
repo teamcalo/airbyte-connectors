@@ -239,6 +239,10 @@ class PullRequestsStream(IncrementalBitbucketStream):
     def name(self) -> str:
         return "pull_requests"
 
+    @property
+    def page_size(self) -> int:
+        return 50
+
     def __init__(self, parent_stream: RepositoriesStream, **kwargs):
         super().__init__(**kwargs)
         self.parent_stream = parent_stream
