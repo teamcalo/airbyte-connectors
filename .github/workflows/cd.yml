@@ -37,6 +37,9 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
+      - name: Require default branch
+        uses: teamcalo/actions/.github/actions/require-default-branch@master
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
